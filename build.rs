@@ -34,6 +34,7 @@ fn generate_bindings(acfutils_redist_path: &std::path::Path) {
 
     let xplane_sdk_path = std::path::Path::new(env!("XPLANE_SDK"));
     bindgen::Builder::default().header("acfutils.h")
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .clang_args([
             &format!("-I{}/include", acfutils_redist_path.display()),
             &format!("-I{}/CHeaders/XPLM", xplane_sdk_path.display()),
@@ -64,7 +65,7 @@ fn get_target() -> Target {
         Target::MacOs
     } else if target == "windows" {
         Target::Windows
-    } else if target == "linux "{
+    } else if target == "linux" {
         Target::Linux
     } else {
         panic!("Unsupported target: {target}");
