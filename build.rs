@@ -14,7 +14,6 @@ fn main() {
 
     #[cfg(feature = "generate-bindings")]
     generate_bindings(&acfutils_redist_path);
-
 }
 
 fn configure(acfutils_redist_path: &std::path::Path) {
@@ -24,7 +23,10 @@ fn configure(acfutils_redist_path: &std::path::Path) {
         Target::Linux => "lin64",
     };
 
-    println!("cargo:rustc-link-search={}/{dir}/lib", acfutils_redist_path.display());
+    println!(
+        "cargo:rustc-link-search={}/{dir}/lib",
+        acfutils_redist_path.display()
+    );
     println!("cargo:rustc-link-lib=static=acfutils");
 }
 
@@ -33,7 +35,11 @@ fn generate_bindings(acfutils_redist_path: &std::path::Path) {
     println!("cargo:rerun-if-changed=acfutils.h");
 
     let xplane_sdk_path = std::path::Path::new(env!("XPLANE_SDK"));
-    bindgen::Builder::default().header("acfutils.h")
+    bindgen::Builder::default()
+        .header("acfutils.h")
+        .default_enum_style(bindgen::EnumVariation::Rust {
+            non_exhaustive: false,
+        })
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .clang_args([
             &format!("-I{}/include", acfutils_redist_path.display()),
@@ -41,7 +47,11 @@ fn generate_bindings(acfutils_redist_path: &std::path::Path) {
             &format!("-D{}", get_xp_def()),
         ])
         .allowlist_file(allow(acfutils_redist_path, "crc64.h"))
+        .allowlist_file(allow(acfutils_redist_path, "geom.h"))
         .allowlist_file(allow(acfutils_redist_path, "log.h"))
+        .blocklist_function("vect3l_.*")
+        .blocklist_function("ecef2gl_l")
+        .blocklist_function("gl2ecef_l")
         .generate()
         .expect("Unable to generate bindings")
         .write_to_file("src/bindings.rs")
