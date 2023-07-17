@@ -39,11 +39,17 @@ fn generate_bindings(acfutils_redist_path: &std::path::Path) {
             &format!("-I{}/CHeaders/XPLM", xplane_sdk_path.display()),
             &format!("-D{}", get_xp_def()),
         ])
-        .allowlist_function("crc64_.*")
+        .allowlist_file(allow(acfutils_redist_path, "crc64.h"))
+        .allowlist_file(allow(acfutils_redist_path, "log.h"))
         .generate()
         .expect("Unable to generate bindings")
         .write_to_file("src/bindings.rs")
         .expect("Couldn't write bindings");
+}
+
+#[cfg(feature = "generate-bindings")]
+fn allow(acfutils_redist_path: &std::path::Path, file: &str) -> String {
+    format!("{}/include/acfutils/{file}", acfutils_redist_path.display())
 }
 
 enum Target {
