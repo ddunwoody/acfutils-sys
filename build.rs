@@ -17,17 +17,21 @@ fn main() {
 }
 
 fn configure(acfutils_redist_path: &std::path::Path) {
-    let dir = match get_target() {
-        Target::Windows => "mingw64",
-        Target::MacOs => "mac64",
-        Target::Linux => "lin64",
-    };
-
-    println!(
-        "cargo:rustc-link-search={}/{dir}/lib",
-        acfutils_redist_path.display()
-    );
-    println!("cargo:rustc-link-lib=static=acfutils");
+    let path = acfutils_redist_path.join("../pkg-config-deps");
+    let output = std::process::Command::new(path)
+        .args([get_arch(), "--libs"])
+        .output()
+        .expect("failed to run pkg-config-deps");
+    let res = String::from_utf8(output.stdout).expect("Could not create string from stdout");
+    res.split_whitespace().for_each(|s| {
+        if s.starts_with("-L") {
+            let s = &s[2..];
+            println!("cargo:rustc-link-search={}", s);
+        } else if s.starts_with("-l") {
+            let s = &s[2..];
+            println!("cargo:rustc-link-lib={s}");
+        }
+    });
 }
 
 #[cfg(feature = "generate-bindings")]
@@ -88,5 +92,13 @@ fn get_xp_def() -> &'static str {
         Target::Windows => "IBM",
         Target::MacOs => "APL",
         Target::Linux => "LIN",
+    }
+}
+
+fn get_arch() -> &'static str {
+    match get_target() {
+        Target::Windows => "win-64",
+        Target::MacOs => "mac-64",
+        Target::Linux => "linux-64",
     }
 }
