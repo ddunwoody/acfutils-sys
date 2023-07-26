@@ -6,18 +6,18 @@
 
 fn main() {
     println!("cargo:rerun-if-env-changed=XPLANE_SDK");
-    println!("cargo:rerun-if-env-changed=LIBACFUTILS_REDIST");
+    println!("cargo:rerun-if-env-changed=LIBACFUTILS");
 
-    let acfutils_redist_path = std::path::Path::new(env!("LIBACFUTILS_REDIST"));
+    let acfutils_path = std::path::Path::new(env!("LIBACFUTILS"));
 
-    configure(&acfutils_redist_path);
+    configure(&acfutils_path);
 
     #[cfg(feature = "generate-bindings")]
-    generate_bindings(&acfutils_redist_path);
+    generate_bindings(&acfutils_path);
 }
 
-fn configure(acfutils_redist_path: &std::path::Path) {
-    let path = acfutils_redist_path.join("../pkg-config-deps");
+fn configure(acfutils_path: &std::path::Path) {
+    let path = acfutils_path.join("pkg-config-deps");
     let output = std::process::Command::new(path)
         .args([get_arch(), "--libs"])
         .output()
@@ -35,9 +35,10 @@ fn configure(acfutils_redist_path: &std::path::Path) {
 }
 
 #[cfg(feature = "generate-bindings")]
-fn generate_bindings(acfutils_redist_path: &std::path::Path) {
+fn generate_bindings(acfutils_path: &std::path::Path) {
     println!("cargo:rerun-if-changed=acfutils.h");
 
+    let acfutils_redist_path = &acfutils_path.join("libacfutils-redist");
     let xplane_sdk_path = std::path::Path::new(env!("XPLANE_SDK"));
     bindgen::Builder::default()
         .header("acfutils.h")
