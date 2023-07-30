@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2021"
 authors = ["David Dunwoody <david.dunwoody@gmail.com>"]
 
+[lib]
+doctest = false
+
 [features]
 generate-bindings = ["dep:bindgen"]
 
