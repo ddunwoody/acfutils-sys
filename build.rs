@@ -1,5 +1,5 @@
 /*
- * Copyright © 2023 David Dunwoody.
+ * Copyright (c) 2023 David Dunwoody.
  *
  * All rights reserved.
  */
@@ -10,10 +10,10 @@ fn main() {
 
     let acfutils_path = std::path::Path::new(env!("LIBACFUTILS"));
 
-    configure(&acfutils_path);
+    configure(acfutils_path);
 
     #[cfg(feature = "generate-bindings")]
-    generate_bindings(&acfutils_path);
+    generate_bindings(acfutils_path);
 }
 
 fn configure(acfutils_path: &std::path::Path) {
@@ -24,12 +24,10 @@ fn configure(acfutils_path: &std::path::Path) {
         .expect("failed to run pkg-config-deps");
     let res = String::from_utf8(output.stdout).expect("Could not create string from stdout");
     res.split_whitespace().for_each(|s| {
-        if s.starts_with("-L") {
-            let s = &s[2..];
+        if let Some(s) = s.strip_prefix("-L") {
             println!("cargo:rustc-link-search={}", s);
-        } else if s.starts_with("-l") {
-            let s = &s[2..];
-            println!("cargo:rustc-link-lib={s}");
+        } else if let Some(s) = s.strip_prefix("-l") {
+            println!("cargo:rustc-link-lib={}", s);
         }
     });
 }

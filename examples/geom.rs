@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2023 David Dunwoody.
+ *
+ * All rights reserved.
+ */
+
 use acfutils_sys::{gc_distance, geo_pos2_t};
 
 fn main() {
