@@ -3,8 +3,14 @@
  *
  * All rights reserved.
  */
-
-#![allow(non_upper_case_globals, non_camel_case_types, non_snake_case)]
+#![deny(clippy::all)]
+#![warn(clippy::pedantic)]
+#![allow(
+    non_upper_case_globals,
+    non_camel_case_types,
+    non_snake_case,
+    clippy::unreadable_literal
+)]
 include!("bindings.rs");
 
 #[cfg(test)]

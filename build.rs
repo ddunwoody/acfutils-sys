@@ -3,101 +3,65 @@
  *
  * All rights reserved.
  */
+#![deny(clippy::all)]
+#![warn(clippy::pedantic)]
+
+use build_support::{get_acfutils_libs, get_target_platform, Platform};
+use std::path::Path;
 
 fn main() {
-    println!("cargo:rerun-if-env-changed=XPLANE_SDK");
     println!("cargo:rerun-if-env-changed=LIBACFUTILS");
-
-    let acfutils_path = std::path::Path::new(env!("LIBACFUTILS"));
-
-    configure(acfutils_path);
+    println!("cargo:rerun-if-env-changed=XPLANE_SDK");
+    let acfutils_path = Path::new(env!("LIBACFUTILS"));
+    let platform = get_target_platform();
+    configure(platform, acfutils_path);
 
     #[cfg(feature = "generate-bindings")]
-    generate_bindings(acfutils_path);
+    generate_bindings(platform, acfutils_path);
 }
 
-fn configure(acfutils_path: &std::path::Path) {
-    let path = acfutils_path.join("pkg-config-deps");
-    let output = std::process::Command::new(path)
-        .args([get_arch(), "--libs"])
-        .output()
-        .expect("failed to run pkg-config-deps");
-    let res = String::from_utf8(output.stdout).expect("Could not create string from stdout");
-    res.split_whitespace().for_each(|s| {
-        if let Some(s) = s.strip_prefix("-L") {
-            println!("cargo:rustc-link-search={}", s);
-        } else if let Some(s) = s.strip_prefix("-l") {
-            println!("cargo:rustc-link-lib={}", s);
-        }
-    });
+fn configure(platform: Platform, acfutils_path: &Path) {
+    println!(
+        "cargo:rustc-link-search={}/{}/lib",
+        acfutils_path.display(),
+        platform.short()
+    );
+
+    for lib in get_acfutils_libs(platform) {
+        println!("cargo:rustc-link-lib={lib}");
+    }
 }
 
 #[cfg(feature = "generate-bindings")]
-fn generate_bindings(acfutils_path: &std::path::Path) {
+fn generate_bindings(platform: Platform, acfutils_path: &Path) {
     println!("cargo:rerun-if-changed=acfutils.h");
-
-    let acfutils_redist_path = &acfutils_path.join("libacfutils-redist");
-    let xplane_sdk_path = std::path::Path::new(env!("XPLANE_SDK"));
+    let xplane_sdk_path = Path::new(env!("XPLANE_SDK"));
     bindgen::Builder::default()
         .header("acfutils.h")
         .default_enum_style(bindgen::EnumVariation::Rust {
             non_exhaustive: false,
         })
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
-        .clang_args([
-            &format!("-I{}/include", acfutils_redist_path.display()),
-            &format!("-I{}/CHeaders/XPLM", xplane_sdk_path.display()),
-            &format!("-D{}", get_xp_def()),
-        ])
-        .allowlist_file(allow(acfutils_redist_path, "crc64.h"))
-        .allowlist_file(allow(acfutils_redist_path, "geom.h"))
-        .allowlist_file(allow(acfutils_redist_path, "log.h"))
+        .clang_args(build_support::get_acfutils_cflags(
+            platform,
+            acfutils_path,
+            xplane_sdk_path,
+        ))
+        .allowlist_file(".*/acfutils/crc64.h")
+        .allowlist_file(".*/acfutils/geom.h")
+        .allowlist_file(".*/acfutils/log.h")
+        // geom.h
         .blocklist_function("vect3l_.*")
         .blocklist_function("ecef2gl_l")
         .blocklist_function("gl2ecef_l")
+        .blocklist_function("log_impl_v")
+        .blocklist_type("vect3l_t")
+        // log.h
+        .blocklist_type("__builtin_va_list")
+        .blocklist_type("__va_list_tag")
+        .blocklist_type("va_list")
         .generate()
         .expect("Unable to generate bindings")
         .write_to_file("src/bindings.rs")
         .expect("Couldn't write bindings");
-}
-
-#[cfg(feature = "generate-bindings")]
-fn allow(acfutils_redist_path: &std::path::Path, file: &str) -> String {
-    format!("{}/include/acfutils/{file}", acfutils_redist_path.display())
-}
-
-enum Target {
-    Windows,
-    MacOs,
-    Linux,
-}
-
-fn get_target() -> Target {
-    let target = std::env::var("CARGO_CFG_TARGET_OS").unwrap();
-    if target == "macos" {
-        Target::MacOs
-    } else if target == "windows" {
-        Target::Windows
-    } else if target == "linux" {
-        Target::Linux
-    } else {
-        panic!("Unsupported target: {target}");
-    }
-}
-
-#[cfg(feature = "generate-bindings")]
-fn get_xp_def() -> &'static str {
-    match get_target() {
-        Target::Windows => "IBM",
-        Target::MacOs => "APL",
-        Target::Linux => "LIN",
-    }
-}
-
-fn get_arch() -> &'static str {
-    match get_target() {
-        Target::Windows => "win-64",
-        Target::MacOs => "mac-64",
-        Target::Linux => "linux-64",
-    }
 }
