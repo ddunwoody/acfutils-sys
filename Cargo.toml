@@ -13,3 +13,6 @@ generate-bindings = ["dep:bindgen"]
 [build-dependencies]
 bindgen = { version = "0.66.1", optional = true }
 build-support = { git = "https://github.com/ddunwoody/build-support.git" }
+
+[patch."https://github.com/ddunwoody/build-support"]
+build-support = { path = "../build-support" }
