@@ -3,6 +3,47 @@
 pub const RAD2DEG_RATIO: f64 = 0.017453292519943295;
 pub const DEG2RAD_RATIO: f64 = 57.29577951308232;
 pub const EARTH_MSL: u32 = 6371200;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct __sbuf {
+    pub _base: *mut ::std::os::raw::c_uchar,
+    pub _size: ::std::os::raw::c_int,
+}
+#[test]
+fn bindgen_test_layout___sbuf() {
+    const UNINIT: ::std::mem::MaybeUninit<__sbuf> = ::std::mem::MaybeUninit::uninit();
+    let ptr = UNINIT.as_ptr();
+    assert_eq!(
+        ::std::mem::size_of::<__sbuf>(),
+        16usize,
+        concat!("Size of: ", stringify!(__sbuf))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<__sbuf>(),
+        8usize,
+        concat!("Alignment of ", stringify!(__sbuf))
+    );
+    assert_eq!(
+        unsafe { ::std::ptr::addr_of!((*ptr)._base) as usize - ptr as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__sbuf),
+            "::",
+            stringify!(_base)
+        )
+    );
+    assert_eq!(
+        unsafe { ::std::ptr::addr_of!((*ptr)._size) as usize - ptr as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__sbuf),
+            "::",
+            stringify!(_size)
+        )
+    );
+}
 pub type bool_t = ::std::os::raw::c_uint;
 pub type logfunc_t =
     ::std::option::Option<unsafe extern "C" fn(arg1: *const ::std::os::raw::c_char)>;
@@ -22,6 +63,265 @@ extern "C" {
 }
 extern "C" {
     pub fn log_backtrace(skip_frames: ::std::os::raw::c_int);
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct conf {
+    _unused: [u8; 0],
+}
+pub type conf_t = conf;
+extern "C" {
+    pub fn conf_create_empty() -> *mut conf_t;
+}
+extern "C" {
+    pub fn conf_create_copy(conf2: *const conf_t) -> *mut conf_t;
+}
+extern "C" {
+    pub fn conf_free(conf: *mut conf_t);
+}
+extern "C" {
+    pub fn conf_read_file(
+        filename: *const ::std::os::raw::c_char,
+        errline: *mut ::std::os::raw::c_int,
+    ) -> *mut conf_t;
+}
+extern "C" {
+    pub fn conf_read2(
+        fp: *mut ::std::os::raw::c_void,
+        errline: *mut ::std::os::raw::c_int,
+        compressed: bool_t,
+    ) -> *mut conf_t;
+}
+extern "C" {
+    pub fn conf_read_buf(
+        buf: *const ::std::os::raw::c_void,
+        cap: usize,
+        errline: *mut ::std::os::raw::c_int,
+    ) -> *mut conf_t;
+}
+extern "C" {
+    pub fn conf_write_file(conf: *const conf_t, filename: *const ::std::os::raw::c_char) -> bool_t;
+}
+extern "C" {
+    pub fn conf_write_file2(
+        conf: *const conf_t,
+        filename: *const ::std::os::raw::c_char,
+        compressed: bool_t,
+    ) -> bool_t;
+}
+extern "C" {
+    pub fn conf_write_buf(
+        conf: *const conf_t,
+        buf: *mut ::std::os::raw::c_void,
+        cap: usize,
+    ) -> usize;
+}
+extern "C" {
+    pub fn conf_merge(conf_from: *const conf_t, conf_to: *mut conf_t);
+}
+extern "C" {
+    pub fn conf_get_str(
+        conf: *const conf_t,
+        key: *const ::std::os::raw::c_char,
+        value: *mut *const ::std::os::raw::c_char,
+    ) -> bool_t;
+}
+extern "C" {
+    pub fn conf_get_i(
+        conf: *const conf_t,
+        key: *const ::std::os::raw::c_char,
+        value: *mut ::std::os::raw::c_int,
+    ) -> bool_t;
+}
+extern "C" {
+    pub fn conf_get_f(
+        conf: *const conf_t,
+        key: *const ::std::os::raw::c_char,
+        value: *mut f32,
+    ) -> bool_t;
+}
+extern "C" {
+    pub fn conf_get_d(
+        conf: *const conf_t,
+        key: *const ::std::os::raw::c_char,
+        value: *mut f64,
+    ) -> bool_t;
+}
+extern "C" {
+    pub fn conf_get_da(
+        conf: *const conf_t,
+        key: *const ::std::os::raw::c_char,
+        value: *mut f64,
+    ) -> bool_t;
+}
+extern "C" {
+    pub fn conf_get_b(
+        conf: *const conf_t,
+        key: *const ::std::os::raw::c_char,
+        value: *mut bool_t,
+    ) -> bool_t;
+}
+extern "C" {
+    pub fn conf_get_data(
+        conf: *const conf_t,
+        key: *const ::std::os::raw::c_char,
+        buf: *mut ::std::os::raw::c_void,
+        cap: usize,
+    ) -> usize;
+}
+extern "C" {
+    pub fn conf_set_str(
+        conf: *mut conf_t,
+        key: *const ::std::os::raw::c_char,
+        value: *const ::std::os::raw::c_char,
+    );
+}
+extern "C" {
+    pub fn conf_set_i(
+        conf: *mut conf_t,
+        key: *const ::std::os::raw::c_char,
+        value: ::std::os::raw::c_int,
+    );
+}
+extern "C" {
+    pub fn conf_set_f(conf: *mut conf_t, key: *const ::std::os::raw::c_char, value: f32);
+}
+extern "C" {
+    pub fn conf_set_d(conf: *mut conf_t, key: *const ::std::os::raw::c_char, value: f64);
+}
+extern "C" {
+    pub fn conf_set_da(conf: *mut conf_t, key: *const ::std::os::raw::c_char, value: f64);
+}
+extern "C" {
+    pub fn conf_set_b(conf: *mut conf_t, key: *const ::std::os::raw::c_char, value: bool_t);
+}
+extern "C" {
+    pub fn conf_set_data(
+        conf: *mut conf_t,
+        key: *const ::std::os::raw::c_char,
+        buf: *const ::std::os::raw::c_void,
+        sz: usize,
+    );
+}
+extern "C" {
+    pub fn conf_get_str_v(
+        conf: *const conf_t,
+        fmt: *const ::std::os::raw::c_char,
+        value: *mut *const ::std::os::raw::c_char,
+        ...
+    ) -> bool_t;
+}
+extern "C" {
+    pub fn conf_get_i_v(
+        conf: *const conf_t,
+        fmt: *const ::std::os::raw::c_char,
+        value: *mut ::std::os::raw::c_int,
+        ...
+    ) -> bool_t;
+}
+extern "C" {
+    pub fn conf_get_f_v(
+        conf: *const conf_t,
+        fmt: *const ::std::os::raw::c_char,
+        value: *mut f32,
+        ...
+    ) -> bool_t;
+}
+extern "C" {
+    pub fn conf_get_d_v(
+        conf: *const conf_t,
+        fmt: *const ::std::os::raw::c_char,
+        value: *mut f64,
+        ...
+    ) -> bool_t;
+}
+extern "C" {
+    pub fn conf_get_da_v(
+        conf: *const conf_t,
+        fmt: *const ::std::os::raw::c_char,
+        value: *mut f64,
+        ...
+    ) -> bool_t;
+}
+extern "C" {
+    pub fn conf_get_b_v(
+        conf: *const conf_t,
+        fmt: *const ::std::os::raw::c_char,
+        value: *mut bool_t,
+        ...
+    ) -> bool_t;
+}
+extern "C" {
+    pub fn conf_get_data_v(
+        conf: *const conf_t,
+        fmt: *const ::std::os::raw::c_char,
+        buf: *mut ::std::os::raw::c_void,
+        cap: usize,
+        ...
+    ) -> usize;
+}
+extern "C" {
+    pub fn conf_set_str_v(
+        conf: *mut conf_t,
+        fmt: *const ::std::os::raw::c_char,
+        value: *const ::std::os::raw::c_char,
+        ...
+    );
+}
+extern "C" {
+    pub fn conf_set_i_v(
+        conf: *mut conf_t,
+        fmt: *const ::std::os::raw::c_char,
+        value: ::std::os::raw::c_int,
+        ...
+    );
+}
+extern "C" {
+    pub fn conf_set_f_v(conf: *mut conf_t, fmt: *const ::std::os::raw::c_char, value: f64, ...);
+}
+extern "C" {
+    pub fn conf_set_d_v(conf: *mut conf_t, fmt: *const ::std::os::raw::c_char, value: f64, ...);
+}
+extern "C" {
+    pub fn conf_set_da_v(conf: *mut conf_t, fmt: *const ::std::os::raw::c_char, value: f64, ...);
+}
+extern "C" {
+    pub fn conf_set_b_v(conf: *mut conf_t, fmt: *const ::std::os::raw::c_char, value: bool_t, ...);
+}
+extern "C" {
+    pub fn conf_set_data_v(
+        conf: *mut conf_t,
+        fmt: *const ::std::os::raw::c_char,
+        buf: *const ::std::os::raw::c_void,
+        sz: usize,
+        ...
+    );
+}
+extern "C" {
+    pub fn conf_get_b2(
+        conf: *const conf_t,
+        key: *const ::std::os::raw::c_char,
+        value: *mut bool,
+    ) -> bool;
+}
+extern "C" {
+    pub fn conf_set_b2(conf: *mut conf_t, key: *const ::std::os::raw::c_char, value: bool);
+}
+extern "C" {
+    pub fn conf_get_b2_v(
+        conf: *const conf_t,
+        fmt: *const ::std::os::raw::c_char,
+        value: *mut bool,
+        ...
+    ) -> bool;
+}
+extern "C" {
+    pub fn conf_walk(
+        conf: *const conf_t,
+        key: *mut *const ::std::os::raw::c_char,
+        value: *mut *const ::std::os::raw::c_char,
+        cookie: *mut *mut ::std::os::raw::c_void,
+    ) -> bool_t;
 }
 extern "C" {
     pub fn crc64_init();
