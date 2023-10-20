@@ -10,20 +10,20 @@ use build_support::{get_acfutils_libs, get_target_platform, Platform};
 use std::path::Path;
 
 fn main() {
-    println!("cargo:rerun-if-env-changed=LIBACFUTILS");
+    println!("cargo:rerun-if-env-changed=LIBACFUTILS_REDIST");
     println!("cargo:rerun-if-env-changed=XPLANE_SDK");
-    let acfutils_path = Path::new(env!("LIBACFUTILS"));
+    let acfutils_redist_path = Path::new(env!("LIBACFUTILS_REDIST"));
     let platform = get_target_platform();
-    configure(platform, acfutils_path);
+    configure(platform, acfutils_redist_path);
 
     #[cfg(feature = "generate-bindings")]
-    generate_bindings(platform, acfutils_path);
+    generate_bindings(platform, acfutils_redist_path);
 }
 
-fn configure(platform: Platform, acfutils_path: &Path) {
+fn configure(platform: Platform, acfutils_redist_path: &Path) {
     println!(
         "cargo:rustc-link-search={}/{}/lib",
-        acfutils_path.display(),
+        acfutils_redist_path.display(),
         platform.short()
     );
 
@@ -33,7 +33,7 @@ fn configure(platform: Platform, acfutils_path: &Path) {
 }
 
 #[cfg(feature = "generate-bindings")]
-fn generate_bindings(platform: Platform, acfutils_path: &Path) {
+fn generate_bindings(platform: Platform, acfutils_redist_path: &Path) {
     println!("cargo:rerun-if-changed=acfutils.h");
     let xplane_sdk_path = Path::new(env!("XPLANE_SDK"));
     bindgen::Builder::default()
@@ -44,7 +44,7 @@ fn generate_bindings(platform: Platform, acfutils_path: &Path) {
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .clang_args(build_support::get_acfutils_cflags(
             platform,
-            acfutils_path,
+            acfutils_redist_path,
             xplane_sdk_path,
         ))
         .allowlist_file(".*/acfutils/conf.h")
